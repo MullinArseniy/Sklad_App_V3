@@ -1,10 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.Text.Json;
-using Sklad_project_app.Сurrency;
-using Sklad_project_app.Models;
-using System;
-
-namespace Sklad_project_app
+﻿namespace Sklad_project_app
 {
     public partial class CurrencyForm : Form
     {

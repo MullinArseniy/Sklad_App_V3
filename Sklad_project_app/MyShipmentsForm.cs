@@ -1,7 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Sklad_project_app.Сurrency;
-
-namespace Sklad_project_app
+﻿namespace Sklad_project_app
 {
     public partial class MyShipmentsForm : Form
     {

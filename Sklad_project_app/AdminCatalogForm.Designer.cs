@@ -1,6 +1,4 @@
-﻿using Sklad_project_app.Models;
-
-namespace Sklad_project_app
+﻿namespace Sklad_project_app
 {
     partial class AdminCatalogForm
     {
@@ -19,6 +17,7 @@ namespace Sklad_project_app
             panelTop = new Panel();
             lblCompany = new Label();
             lblUserInfo = new Label();
+            btnHeatMap = new Button();
             btnLogout = new Button();
             panelLeft = new Panel();
             btnCurrency = new Button();
@@ -64,6 +63,7 @@ namespace Sklad_project_app
             txtRestEdit = new TextBox();
             btnCancelEdit = new Button();
             btnSaveEdit = new Button();
+            btnBlacklist = new Button();
             panelTop.SuspendLayout();
             panelLeft.SuspendLayout();
             panelActions.SuspendLayout();
@@ -132,6 +132,8 @@ namespace Sklad_project_app
             panelLeft.Controls.Add(btnCatalog);
             panelLeft.Controls.Add(btnCategories);
             panelLeft.Controls.Add(btnHistory);
+            panelLeft.Controls.Add(btnHeatMap);
+            panelLeft.Controls.Add(btnBlacklist);
             panelLeft.Location = new Point(0, 35);
             panelLeft.Name = "panelLeft";
             panelLeft.Size = new Size(140, 565);
@@ -147,6 +149,24 @@ namespace Sklad_project_app
             btnCurrency.TabIndex = 10;
             btnCurrency.Text = "Валюта";
             btnCurrency.Click += btnCurrency_Click;
+            //
+            //btnBlacklist
+            //
+            btnBlacklist.FlatStyle = FlatStyle.Flat;
+            btnBlacklist.Location = new Point(5, 302);
+            btnBlacklist.Name = "btnBlacklist";
+            btnBlacklist.Size = new Size(128, 30);
+            btnBlacklist.Text = "Черный список";
+            btnBlacklist.Click += btnBlacklist_Click;
+            //
+            //btnHeatMap
+            //
+            btnHeatMap.FlatStyle = FlatStyle.Flat;
+            btnHeatMap.Location = new Point(5, 340);
+            btnHeatMap.Name = "btnHeatMap";
+            btnHeatMap.Size = new Size(128, 30);
+            btnHeatMap.Text = "Тепловая карта";
+            btnHeatMap.Click += btnHeatMap_Click;
             // 
             // btnWrittenOff
             // 
@@ -717,5 +737,7 @@ namespace Sklad_project_app
         private Button btnExpirationDates;
         private Button btnWrittenOff;
         private Button btnCurrency;
+        private Button btnHeatMap;
+        private Button btnBlacklist;
     }
 }

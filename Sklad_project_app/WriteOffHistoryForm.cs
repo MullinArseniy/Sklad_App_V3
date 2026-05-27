@@ -1,12 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using Sklad_project_app;
-using Sklad_project_app.Import;
-using Sklad_project_app.Models;
-using Sklad_project_app.Сurrency;
-
-
-namespace Sklad_project_app
+﻿namespace Sklad_project_app
 {
     public partial class WriteOffHistoryForm : Form
     {

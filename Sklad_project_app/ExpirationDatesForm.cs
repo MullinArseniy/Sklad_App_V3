@@ -1,12 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using Sklad_project_app;
-using Sklad_project_app.Import;
-using Sklad_project_app.Models;
-using Sklad_project_app.Сurrency;
-
-
-namespace Sklad_project_app
+﻿namespace Sklad_project_app
 {
     public partial class ExpirationDatesForm : Form
     {
@@ -37,7 +29,7 @@ namespace Sklad_project_app
             cmbDiscount.SelectedIndex = 0;
         }
 
-        public void LoadExpiringProducts()
+        public async void LoadExpiringProducts()
         {
             try
             {
@@ -45,11 +37,11 @@ namespace Sklad_project_app
                 {
                     var today = DateTime.Now.Date;
 
-                    var batches = db.StockBatches
+                    var batches = await db.StockBatches
                         .Include(b => b.Product)
                         .ThenInclude(p => p.Category)
                         .Where(b => b.IsWrittenOff == false && b.Quantity > 0 && b.ExpiryDate != null)
-                        .ToList();
+                        .ToListAsync();
 
                     dgvExpiry.Rows.Clear();
                     dgvExpiry.Columns.Clear();

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Sklad_project_app.Сurrency
+﻿namespace Sklad_project_app.Сurrency
 {
     /// <summary>
     /// Загружает курсы валют из API

@@ -4,6 +4,6 @@ namespace Sklad_project_app
 {
     public static class DbConfig
     {
-        public static string ConnectionString = "Host=localhost;Port=6767;Database=Test;Username=postgres;Password=10QwertyuioP;";
+        public static string ConnectionString = "Host=localhost;Port=5432;Database=Project_3;Username=postgres;Password=12345;";
     }
 }

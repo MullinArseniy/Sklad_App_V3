@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Sklad_project_app
+﻿namespace Sklad_project_app
 {
     public static class Logger
     {
