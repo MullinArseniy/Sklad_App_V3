@@ -669,9 +669,6 @@
         /// Возвращает текстовое предупреждение о погодных рисках для груза.
         /// Анализирует минимальную и максимальную температуру.
         /// </summary>
-        /// <param name="tempMin">Минимальная температура (Цельсий)</param>
-        /// <param name="tempMax">Максимальная температура (Цельсий)</param>
-        /// <returns>Строка с предупреждением или пустая строка если всё в порядке</returns>
         private string GetWeatherWarning(decimal tempMin, decimal tempMax)
         {
             if (tempMin < -15)

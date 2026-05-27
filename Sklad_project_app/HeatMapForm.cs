@@ -47,13 +47,11 @@
             using var db = new SkladContext();
             var today = DateTime.Now.Date;
 
-            // Загружаем все активные партии
             var query = db.StockBatches
                 .Include(b => b.Product)
                 .ThenInclude(p => p.Category)
                 .Where(b => !b.IsWrittenOff && b.Quantity > 0 && b.ExpiryDate != null);
 
-            // Если выбрана конкретная категория — фильтруем
             if (cmbZone.SelectedIndex > 0)
             {
                 var selectedCategory = cmbZone.SelectedItem.ToString();
@@ -76,7 +74,6 @@
                 return;
             }
 
-            // Определяем сколько колонок делаем в таблице
             var cols = 5;
             var cellWidth = 160;
             var cellHeight = 90;
@@ -97,7 +94,6 @@
                 panelMap.Controls.Add(cell);
             }
 
-            // Добавляем легенду
             AddLegend(batches.Count, cols, cellWidth, cellHeight, paddingX, paddingY);
         }
 
@@ -117,7 +113,6 @@
                 Cursor = Cursors.Hand
             };
 
-            // Название товара
             var lblName = new Label
             {
                 Text = batch.Product?.Name ?? "—",
@@ -128,7 +123,6 @@
                 TextAlign = ContentAlignment.MiddleCenter
             };
 
-            // Срок годности
             var lblExpiry = new Label
             {
                 Text = "Годен до: " + batch.ExpiryDate.Value.ToString("dd.MM.yyyy"),
@@ -139,7 +133,6 @@
                 TextAlign = ContentAlignment.MiddleCenter
             };
 
-            // Остаток дней
             var daysText = daysLeft <= 0 ? "ПРОСРОЧЕН!" : $"Осталось: {daysLeft} дн.";
             var lblDays = new Label
             {
@@ -151,7 +144,6 @@
                 TextAlign = ContentAlignment.MiddleCenter
             };
 
-            // Количество
             var lblQty = new Label
             {
                 Text = $"Кол-во: {batch.Quantity} шт.",
