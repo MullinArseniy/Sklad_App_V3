@@ -389,5 +389,10 @@
             var writeoffhistory = new WriteOffHistoryForm();
             writeoffhistory.ShowDialog();
         }
+        private void btnHeatMap_Click(object sender, EventArgs e)
+        {
+            var form = new HeatMapForm();
+            form.ShowDialog();
+        }
     }
 }
