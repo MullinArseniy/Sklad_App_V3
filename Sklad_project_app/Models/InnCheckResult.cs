@@ -3,7 +3,7 @@
     /// <summary>
     /// Результат проверки ИНН поставщика по чёрному списку.
     /// </summary>
-    internal class InnCheckResult
+    public class InnCheckResult
     {
         /// <summary>
         /// Разрешён ли импорт (true — поставщик чист, false — заблокирован)

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Sklad_project_app
 {
-    internal class ImportResult
+    public class ImportResult
     {
         /// <summary>
         /// Количество успешно импортированных позиций

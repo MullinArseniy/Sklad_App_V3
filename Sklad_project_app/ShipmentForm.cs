@@ -524,7 +524,7 @@
         /// <summary>
         /// Загружает список городов из таблицы cities_weather в выпадающий список.
         /// </summary>
-        private void LoadCitiesToComboBox()
+        public void LoadCitiesToComboBox()
         {
             try
             {
@@ -669,7 +669,7 @@
         /// Возвращает текстовое предупреждение о погодных рисках для груза.
         /// Анализирует минимальную и максимальную температуру.
         /// </summary>
-        private string GetWeatherWarning(decimal tempMin, decimal tempMax)
+        public string GetWeatherWarning(decimal tempMin, decimal tempMax)
         {
             if (tempMin < -15)
             {

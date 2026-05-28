@@ -879,7 +879,7 @@ namespace Sklad_project_app
         /// Если ИНН отсутствует во всех позициях — предупреждает, но разрешает импорт.
         /// Если ИНН найден в чёрном списке — запрещает импорт и возвращает причину.
         /// </summary>
-        private async Task<InnCheckResult> CheckSupplierInnAsync(List<ImportSupplies> supplies)
+        public async Task<InnCheckResult> CheckSupplierInnAsync(List<ImportSupplies> supplies)
         {
             var inn = "";
             foreach (var item in supplies)
@@ -1008,7 +1008,7 @@ namespace Sklad_project_app
         /// Если товар по артикулу не найден — позиция пропускается.
         /// </summary>
 
-        private async Task<ImportResult> ImportSuppliesAsync(List<ImportSupplies> supplies, string fileName)
+        public async Task<ImportResult> ImportSuppliesAsync(List<ImportSupplies> supplies, string fileName)
         {
             var importedCount = 0;
             var skippedCount = 0;

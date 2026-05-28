@@ -19,7 +19,7 @@
         /// <summary>
         /// Загружает все записи чёрного списка из базы данных в таблицу.
         /// </summary>
-        private void LoadBlacklist()
+        public void LoadBlacklist()
         {
             try
             {

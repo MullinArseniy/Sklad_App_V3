@@ -24,7 +24,7 @@
             BuildHeatMap();
         }
 
-        private void LoadCategoriesToCombo()
+        public void LoadCategoriesToCombo()
         {
             using var db = new SkladContext();
             var categories = db.Categories.ToList();
@@ -40,7 +40,7 @@
             cmbZone.SelectedIndex = 0;
         }
 
-        private void BuildHeatMap()
+        public void BuildHeatMap()
         {
             panelMap.Controls.Clear();
 
@@ -97,7 +97,7 @@
             AddLegend(batches.Count, cols, cellWidth, cellHeight, paddingX, paddingY);
         }
 
-        private Panel CreateCell(StockBatch batch, DateTime today, int x, int y, int w, int h)
+        public Panel CreateCell(StockBatch batch, DateTime today, int x, int y, int w, int h)
         {
             var daysLeft = (batch.ExpiryDate!.Value.Date - today).Days;
 
@@ -177,7 +177,7 @@
             return cell;
         }
 
-        private Color GetCellColor(int daysLeft)
+        public Color GetCellColor(int daysLeft)
         {
             if (daysLeft <= 0)
             {
