@@ -1140,6 +1140,22 @@ namespace Sklad_project_app
         {
 
         }
+
+        private void btnHeatMap_Click(object sender, EventArgs e)
+        {
+            var form = new HeatMapForm();
+            form.ShowDialog();
+        }
+
+        /// <summary>
+        /// Открывает форму управления чёрным списком контрагентов.
+        /// </summary>
+        private void btnBlacklist_Click(object sender, EventArgs e)
+        {
+            var form = new BlacklistForm();
+            form.ShowDialog();
+        }
+
     }
 
 }

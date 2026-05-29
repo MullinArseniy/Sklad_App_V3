@@ -51,6 +51,8 @@
             btnCatalog = new Button();
             btnShipment = new Button();
             btnMyShipments = new Button();
+            btnHeatMap = new Button();
+            btnBlacklist = new Button();
             panelActions = new Panel();
             btnImport = new Button();
             btnAddComing = new Button();
@@ -139,6 +141,8 @@
             panelLeft.Controls.Add(btnCatalog);
             panelLeft.Controls.Add(btnShipment);
             panelLeft.Controls.Add(btnMyShipments);
+            panelLeft.Controls.Add(btnHeatMap);
+            panelLeft.Controls.Add(btnBlacklist);
             panelLeft.Location = new Point(0, 35);
             panelLeft.Name = "panelLeft";
             panelLeft.Size = new Size(140, 565);
@@ -423,7 +427,7 @@
             // btnHistory
             // 
             btnHistory.FlatStyle = FlatStyle.Flat;
-            btnHistory.Location = new Point(7, 299);
+            btnHistory.Location = new Point(6, 375);
             btnHistory.Name = "btnHistory";
             btnHistory.Size = new Size(128, 30);
             btnHistory.TabIndex = 10;
@@ -517,6 +521,26 @@
             btnMyShipments.Text = "Мои отгрузки";
             btnMyShipments.Click += btnMyShipments_Click;
             // 
+            // btnHeatMap
+            // 
+            btnHeatMap.FlatStyle = FlatStyle.Flat;
+            btnHeatMap.Location = new Point(5, 340);
+            btnHeatMap.Name = "btnHeatMap";
+            btnHeatMap.Size = new Size(128, 30);
+            btnHeatMap.TabIndex = 11;
+            btnHeatMap.Text = "Тепловая карта";
+            btnHeatMap.Click += btnHeatMap_Click;
+            // 
+            // btnBlacklist
+            // 
+            btnBlacklist.FlatStyle = FlatStyle.Flat;
+            btnBlacklist.Location = new Point(5, 302);
+            btnBlacklist.Name = "btnBlacklist";
+            btnBlacklist.Size = new Size(128, 30);
+            btnBlacklist.TabIndex = 12;
+            btnBlacklist.Text = "Черный список";
+            btnBlacklist.Click += btnBlacklist_Click;
+            // 
             // panelActions
             // 
             panelActions.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
@@ -528,7 +552,7 @@
             panelActions.Controls.Add(btnRefresh);
             panelActions.Location = new Point(140, 35);
             panelActions.Name = "panelActions";
-            panelActions.Size = new Size(960, 45);
+            panelActions.Size = new Size(960, 590);
             panelActions.TabIndex = 2;
             // 
             // btnImport
@@ -726,14 +750,14 @@
             dgvProducts.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             dgvProducts.ColumnHeadersHeight = 29;
             dgvProducts.EnableHeadersVisualStyles = false;
-            dgvProducts.Location = new Point(140, 180);
+            dgvProducts.Location = new Point(140, 83);
             dgvProducts.MultiSelect = false;
             dgvProducts.Name = "dgvProducts";
             dgvProducts.ReadOnly = true;
             dgvProducts.RowHeadersVisible = false;
             dgvProducts.RowHeadersWidth = 51;
             dgvProducts.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvProducts.Size = new Size(960, 420);
+            dgvProducts.Size = new Size(960, 517);
             dgvProducts.TabIndex = 5;
             // 
             // SuppliesForm
@@ -815,6 +839,8 @@
         private Button btnWrittenOff;
         private Button btnCurrency;
         private Button btnHistory;
+        private Button btnHeatMap;
+        private Button btnBlacklist;
         private System.Windows.Forms.Label lblInnSupply;
         private System.Windows.Forms.TextBox txtInnSupply;
         private System.Windows.Forms.Button btnCheckApiSupply;

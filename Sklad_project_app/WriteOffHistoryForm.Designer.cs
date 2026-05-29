@@ -13,7 +13,7 @@
 
         private void InitializeComponent()
         {
-            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
             panelTop = new Panel();
             lblCompany = new Label();
             lblUserInfo = new Label();
@@ -28,6 +28,8 @@
             btnCatalog = new Button();
             btnShipment = new Button();
             btnMyShipments = new Button();
+            btnHeatMap = new Button();
+            btnBlacklist = new Button();
             panelActions = new Panel();
             btnRefresh = new Button();
             panelFilters = new Panel();
@@ -111,6 +113,8 @@
             panelLeft.Controls.Add(btnCatalog);
             panelLeft.Controls.Add(btnShipment);
             panelLeft.Controls.Add(btnMyShipments);
+            panelLeft.Controls.Add(btnHeatMap);
+            panelLeft.Controls.Add(btnBlacklist);
             panelLeft.Location = new Point(0, 35);
             panelLeft.Name = "panelLeft";
             panelLeft.Size = new Size(140, 565);
@@ -119,7 +123,7 @@
             // btnHistory
             // 
             btnHistory.FlatStyle = FlatStyle.Flat;
-            btnHistory.Location = new Point(6, 302);
+            btnHistory.Location = new Point(7, 302);
             btnHistory.Name = "btnHistory";
             btnHistory.Size = new Size(128, 30);
             btnHistory.TabIndex = 11;
@@ -212,6 +216,26 @@
             btnMyShipments.TabIndex = 2;
             btnMyShipments.Text = "Мои отгрузки";
             btnMyShipments.Click += btnMyShipments_Click;
+            // 
+            // btnHeatMap
+            // 
+            btnHeatMap.FlatStyle = FlatStyle.Flat;
+            btnHeatMap.Location = new Point(6, 374);
+            btnHeatMap.Name = "btnHeatMap";
+            btnHeatMap.Size = new Size(128, 30);
+            btnHeatMap.TabIndex = 11;
+            btnHeatMap.Text = "Тепловая карта";
+            btnHeatMap.Click += btnHeatMap_Click;
+            // 
+            // btnBlacklist
+            // 
+            btnBlacklist.FlatStyle = FlatStyle.Flat;
+            btnBlacklist.Location = new Point(7, 338);
+            btnBlacklist.Name = "btnBlacklist";
+            btnBlacklist.Size = new Size(128, 30);
+            btnBlacklist.TabIndex = 12;
+            btnBlacklist.Text = "Черный список";
+            btnBlacklist.Click += btnBlacklist_Click;
             // 
             // panelActions
             // 
@@ -368,14 +392,14 @@
             dgvWriteOffs.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgvWriteOffs.BackgroundColor = Color.White;
             dgvWriteOffs.BorderStyle = BorderStyle.None;
-            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = Color.FromArgb(50, 50, 50);
-            dataGridViewCellStyle2.Font = new Font("Arial", 9F, FontStyle.Bold);
-            dataGridViewCellStyle2.ForeColor = Color.White;
-            dataGridViewCellStyle2.SelectionBackColor = SystemColors.Highlight;
-            dataGridViewCellStyle2.SelectionForeColor = SystemColors.HighlightText;
-            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.True;
-            dgvWriteOffs.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = Color.FromArgb(50, 50, 50);
+            dataGridViewCellStyle1.Font = new Font("Arial", 9F, FontStyle.Bold);
+            dataGridViewCellStyle1.ForeColor = Color.White;
+            dataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
+            dgvWriteOffs.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             dgvWriteOffs.ColumnHeadersHeight = 29;
             dgvWriteOffs.EnableHeadersVisualStyles = false;
             dgvWriteOffs.Location = new Point(140, 180);
@@ -442,5 +466,7 @@
         private Button btnWrittenOff;
         private Button btnCurrency;
         private Button btnHistory;
+        private Button btnHeatMap;
+        private Button btnBlacklist;
     }
 }

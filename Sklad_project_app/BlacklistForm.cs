@@ -57,6 +57,7 @@
         /// Добавляет нового контрагента в чёрный список.
         /// Проверяет заполненность полей и уникальность ИНН.
         /// </summary>
+        
         private void btnAdd_Click(object sender, EventArgs e)
         {
             var inn = txtInn.Text.Trim();
@@ -113,7 +114,7 @@
                     Inn = inn,
                     Name = string.IsNullOrEmpty(name) ? null : name,
                     Reason = reason,
-                    AddedDate = DateTime.Now
+                    AddedDate = DateTime.UtcNow
                 };
 
                 db.Blacklist.Add(newEntry);
@@ -129,7 +130,16 @@
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Ошибка при добавлении: " + ex.Message,
+                var realMessage = ex.Message;
+                var inner = ex.InnerException;
+                while (inner != null)
+                {
+                    realMessage = inner.Message;
+                    inner = inner.InnerException;
+                }
+
+                // Покажет точную причину (например: "String or binary data would be truncated")
+                MessageBox.Show("Ошибка БД: " + realMessage,
                     "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
