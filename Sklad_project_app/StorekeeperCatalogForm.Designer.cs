@@ -24,6 +24,7 @@
             btnCatalog = new Button();
             btnShipment = new Button();
             btnMyShipments = new Button();
+            btnHeatMap = new Button();
             panelActions = new Panel();
             btnView = new Button();
             btnRefresh = new Button();
@@ -120,6 +121,7 @@
             panelLeft.Controls.Add(btnCatalog);
             panelLeft.Controls.Add(btnShipment);
             panelLeft.Controls.Add(btnMyShipments);
+            panelLeft.Controls.Add(btnHeatMap);
             panelLeft.Location = new Point(0, 35);
             panelLeft.Name = "panelLeft";
             panelLeft.Size = new Size(140, 565);
@@ -178,6 +180,16 @@
             btnMyShipments.TabIndex = 2;
             btnMyShipments.Text = "Мои отгрузки";
             btnMyShipments.Click += btnMyShipments_Click;
+            // 
+            // btnHeatMap
+            // 
+            btnHeatMap.FlatStyle = FlatStyle.Flat;
+            btnHeatMap.Location = new Point(5, 194);
+            btnHeatMap.Name = "btnHeatMap";
+            btnHeatMap.Size = new Size(128, 30);
+            btnHeatMap.TabIndex = 8;
+            btnHeatMap.Text = "Тепловая карта";
+            btnHeatMap.Click += btnHeatMap_Click;
             // 
             // panelActions
             // 
@@ -573,6 +585,7 @@
             panelView.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
+
         }
 
         private System.Windows.Forms.Panel panelTop;
@@ -616,5 +629,6 @@
         private System.Windows.Forms.Button btnCloseView;
         private Button btnSuplies;
         private Button btnWrittenOff;
+        private Button btnHeatMap;
     }
 }

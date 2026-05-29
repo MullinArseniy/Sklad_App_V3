@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Sklad_project_app.Сurrency
+﻿namespace Sklad_project_app.Сurrency
 {
     /// <summary>
     ///  Класс для десериализации JSON-ответа от API курсов валют

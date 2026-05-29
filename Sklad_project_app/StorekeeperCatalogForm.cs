@@ -1,10 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Sklad_project_app.Models;
-using Sklad_project_app.Сurrency;
-using Sklad_project_app;
-
-
-namespace Sklad_project_app
+﻿namespace Sklad_project_app
 {
     public partial class StorekeeperCatalogForm : Form
     {
@@ -46,17 +40,17 @@ namespace Sklad_project_app
             cmbAvailability.SelectedIndex = 0;
         }
 
-        public void LoadProducts()
+        public async void LoadProducts()
         {
             try
             {
                 using (var db = new SkladContext())
                 {
-                    var allProducts = db.Products
+                    var allProducts = await db.Products
                         .Include("Category")
                         .Include("Unit")
                         .Include("Stock")
-                        .ToList();
+                        .ToListAsync();
 
                     int totalCount = allProducts.Count;
 
@@ -191,8 +185,8 @@ namespace Sklad_project_app
 
                         if (product.Stock != null)
                         {
-                            var hasActiveDiscount = db.StockBatches
-                        .Any(b => b.ProductId == product.Id && !b.IsWrittenOff && b.Quantity > 0 && b.DiscountPercent > 0);
+                            var hasActiveDiscount =await db.StockBatches
+                        .AnyAsync(b => b.ProductId == product.Id && !b.IsWrittenOff && b.Quantity > 0 && b.DiscountPercent > 0);
                             hasDiscount = hasActiveDiscount ? "Да" : "Нет";
                             price = CurrencyHelp.Format(product.Stock.PurchasePrice);
                             rest = product.Stock.Rest.ToString();
@@ -394,6 +388,11 @@ namespace Sklad_project_app
         {
             var writeoffhistory = new WriteOffHistoryForm();
             writeoffhistory.ShowDialog();
+        }
+        private void btnHeatMap_Click(object sender, EventArgs e)
+        {
+            var form = new HeatMapForm();
+            form.ShowDialog();
         }
     }
 }

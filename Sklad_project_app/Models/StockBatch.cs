@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Sklad_project_app.Models
+﻿namespace Sklad_project_app.Models
 {
     /// <summary>
     /// Партия товара. Хранит информацию о каждой поставке

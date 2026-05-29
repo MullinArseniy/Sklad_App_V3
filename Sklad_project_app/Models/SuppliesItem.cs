@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Sklad_project_app.Models
+﻿namespace Sklad_project_app.Models
 {
     /// <summary>
     /// Детали поставки

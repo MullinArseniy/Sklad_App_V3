@@ -1,9 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Sklad_project_app;
-using Sklad_project_app.Models;
-using Sklad_project_app.Сurrency;
-
-namespace Sklad_project_app
+﻿namespace Sklad_project_app
 {
     public partial class ShipmentForm : Form
     {
@@ -20,6 +15,7 @@ namespace Sklad_project_app
         {
             LoadCategoriesToFilter();
             LoadProducts();
+            LoadCitiesToComboBox();
             dtpDate.Value = DateTime.Today;
         }
 
@@ -44,16 +40,16 @@ namespace Sklad_project_app
             cmbAvailability.SelectedIndex = 0;
         }
 
-        public void LoadProducts()
+        public async void LoadProducts()
         {
             try
             {
                 using (var db = new SkladContext())
                 {
-                    var allProducts = db.Products
+                    var allProducts = await db.Products
                         .Include("Category")
                         .Include("Stock")
-                        .ToList();
+                        .ToListAsync();
 
                     var searchText = txtSearch.Text.Trim().ToLower();
                     var afterSearch = new List<Product>();
@@ -166,11 +162,11 @@ namespace Sklad_project_app
 
                         if (product.Stock != null)
                         {
-                            var maxDiscount = db.StockBatches
+                            var maxDiscount = await db.StockBatches
                                 .Where(b => b.ProductId == product.Id && !b.IsWrittenOff && b.Quantity > 0)
                                 .OrderByDescending(b => b.DiscountPercent)
                                 .Select(b => b.DiscountPercent)
-                                .FirstOrDefault();
+                                .FirstOrDefaultAsync();
 
                             decimal originalPrice = product.Stock.PurchasePrice;
 
@@ -243,7 +239,7 @@ namespace Sklad_project_app
             lblTotal.Text = $"{AppResources.LblTotalItems}\n{total} шт.\nСумма: {CurrencyHelp.Format(totalAmount)}";
         }
 
-        private void btnSubmit_Click(object sender, EventArgs e)
+        private async void btnSubmit_Click(object sender, EventArgs e)
         {
             var clientName = txtClientName.Text.Trim();
             if (string.IsNullOrEmpty(clientName))
@@ -265,9 +261,9 @@ namespace Sklad_project_app
                     decimal totalAmount = 0;
                     foreach (var item in _shipmentItems.Values)
                     {
-                        var available = db.StockBatches
+                        var available = await db.StockBatches
                             .Where(b => b.ProductId == item.ProductId && !b.IsWrittenOff && b.Quantity > 0)
-                            .Sum(b => b.Quantity);
+                            .SumAsync(b => b.Quantity);
 
                         if (available < item.Quantity)
                         {
@@ -283,12 +279,12 @@ namespace Sklad_project_app
                         }
                     }
 
-                    var foundClient = db.Clients.FirstOrDefault(c => c.Name == clientName);
+                    var foundClient = await db.Clients.FirstOrDefaultAsync(c => c.Name == clientName);
                     if (foundClient == null)
                     {
                         foundClient = new Client { Id = Guid.NewGuid(), Name = clientName };
                         db.Clients.Add(foundClient);
-                        db.SaveChanges();
+                        await db.SaveChangesAsync();
                     }
 
                     var newShipment = new Shipment
@@ -328,7 +324,7 @@ namespace Sklad_project_app
                         }
 
                         // общий остаток
-                        var stock = db.Stocks.FirstOrDefault(s => s.ProductId == item.ProductId);
+                        var stock = await db.Stocks.FirstOrDefaultAsync(s => s.ProductId == item.ProductId);
                         if (stock != null)
                         {
                             stock.Rest -= item.Quantity;
@@ -522,6 +518,204 @@ namespace Sklad_project_app
                 if (form != loginForm)
                     form.Close();
             }
+        }
+
+
+        /// <summary>
+        /// Загружает список городов из таблицы cities_weather в выпадающий список.
+        /// </summary>
+        public void LoadCitiesToComboBox()
+        {
+            try
+            {
+                using var db = new SkladContext();
+                var cities = db.CitiesWeather
+                    .OrderBy(c => c.CityName)
+                    .ToList();
+
+                cmbCity.Items.Clear();
+                cmbCity.Items.Add("-- Выберите город --");
+
+                foreach (var city in cities)
+                {
+                    cmbCity.Items.Add(city.CityName);
+                }
+
+                cmbCity.SelectedIndex = 0;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка при загрузке списка городов: " + ex.Message,
+                    "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// Проверяет ИНН клиента по таблице чёрного списка в базе данных.
+        /// Если контрагент найден — выводит предупреждение с причиной блокировки.
+        /// Если не найден — сообщает что контрагент чист.
+        /// </summary>
+        private void btnCheckBlacklist_Click(object sender, EventArgs e)
+        {
+            var inn = txtClientInn.Text.Trim();
+
+            if (string.IsNullOrEmpty(inn))
+            {
+                MessageBox.Show("Введите ИНН клиента для проверки.",
+                    "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (inn.Length != 10 && inn.Length != 12)
+            {
+                MessageBox.Show("ИНН должен содержать 10 цифр (юрлицо) или 12 цифр (ИП).",
+                    "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            foreach (var ch in inn)
+            {
+                if (!char.IsDigit(ch))
+                {
+                    MessageBox.Show("ИНН должен содержать только цифры.",
+                        "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+            }
+
+            try
+            {
+                using var db = new SkladContext();
+                var found = db.Blacklist.FirstOrDefault(b => b.Inn == inn);
+
+                if (found != null)
+                {
+                    MessageBox.Show(
+                        "ВНИМАНИЕ! Клиент находится в чёрном списке!\n\n" +
+                        "ИНН: " + found.Inn + "\n" +
+                        "Наименование: " + (found.Name ?? "не указано") + "\n" +
+                        "Причина блокировки: " + found.Reason + "\n" +
+                        "Дата добавления: " + found.AddedDate.ToString("dd.MM.yyyy") + "\n\n" +
+                        "Отгрузка данному клиенту не рекомендуется.",
+                        "Контрагент в чёрном списке",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
+                }
+                else
+                {
+                    MessageBox.Show(
+                        "ИНН " + inn + " не найден в чёрном списке.\n" +
+                        "Клиент не имеет ограничений по базе данных.",
+                        "Проверка пройдена",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка при проверке контрагента: " + ex.Message,
+                    "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// Показывает погодные данные для выбранного города из базы данных.
+        /// Предупреждает о погодных рисках для груза (мороз, жара).
+        /// </summary>
+        private void btnCheckWeather_Click(object sender, EventArgs e)
+        {
+            if (cmbCity.SelectedIndex <= 0)
+            {
+                MessageBox.Show("Выберите город доставки из списка.",
+                    "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var selectedCityName = cmbCity.SelectedItem.ToString();
+
+            try
+            {
+                using var db = new SkladContext();
+                var city = db.CitiesWeather.FirstOrDefault(c => c.CityName == selectedCityName);
+
+                if (city == null)
+                {
+                    MessageBox.Show("Данные о погоде для города " + selectedCityName + " не найдены.",
+                        "Нет данных", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                var warning = GetWeatherWarning(city.TemperatureMin, city.TemperatureMax);
+
+                var message =
+                    "Город: " + city.CityName + "\n" +
+                    "Регион: " + (city.Region ?? "не указан") + "\n" +
+                    "Температура: от " + city.TemperatureMin + " до " + city.TemperatureMax + " градусов Цельсия\n" +
+                    "Описание: " + (city.WeatherDescription ?? "нет данных") + "\n" +
+                    "Данные актуальны на: " + city.UpdatedAt.ToString("dd.MM.yyyy") +
+                    warning;
+
+                MessageBox.Show(message, "Погода в городе доставки",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка при получении данных о погоде: " + ex.Message,
+                    "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// Возвращает текстовое предупреждение о погодных рисках для груза.
+        /// Анализирует минимальную и максимальную температуру.
+        /// </summary>
+        public string GetWeatherWarning(decimal tempMin, decimal tempMax)
+        {
+            if (tempMin < -15)
+            {
+                return "\n\nВНИМАНИЕ! Аномальный мороз!\n" +
+                       "Рекомендуется использовать термоконтейнер и оформить страховку груза.";
+            }
+
+            if (tempMax > 35)
+            {
+                return "\n\nВНИМАНИЕ! Аномальная жара!\n" +
+                       "Рекомендуется использовать рефрижератор и оформить страховку груза.";
+            }
+
+            if (tempMin < -5)
+            {
+                return "\n\nМорозная погода.\n" +
+                       "Для хрупких и замерзающих товаров рекомендуется утепление.";
+            }
+
+            if (tempMax > 25)
+            {
+                return "\n\nТёплая погода.\n" +
+                       "Для скоропортящихся товаров требуется холодильная транспортировка.";
+            }
+
+            return "\n\nПогодные условия благоприятны для доставки.";
+        }
+
+        private void txtRegion_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void lblDate_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void lblTotal_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void dtpDate_ValueChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

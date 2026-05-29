@@ -26,6 +26,8 @@
             btnReports = new Button();
             btnSuplies = new Button();
             btnCatalog = new Button();
+            btnHeatMap = new Button();
+            btnBlacklist = new Button();
             panelActions = new Panel();
             btnWriteOff = new Button();
             btnRefresh = new Button();
@@ -103,6 +105,8 @@
             panelLeft.Controls.Add(btnReports);
             panelLeft.Controls.Add(btnSuplies);
             panelLeft.Controls.Add(btnCatalog);
+            panelLeft.Controls.Add(btnHeatMap);
+            panelLeft.Controls.Add(btnBlacklist);
             panelLeft.Location = new Point(0, 35);
             panelLeft.Name = "panelLeft";
             panelLeft.Size = new Size(140, 565);
@@ -184,6 +188,26 @@
             btnCatalog.Text = "Каталог";
             btnCatalog.UseVisualStyleBackColor = false;
             btnCatalog.Click += btnCatalog_Click;
+            // 
+            // btnHeatMap
+            // 
+            btnHeatMap.FlatStyle = FlatStyle.Flat;
+            btnHeatMap.Location = new Point(5, 301);
+            btnHeatMap.Name = "btnHeatMap";
+            btnHeatMap.Size = new Size(128, 30);
+            btnHeatMap.TabIndex = 11;
+            btnHeatMap.Text = "Тепловая карта";
+            btnHeatMap.Click += btnHeatMap_Click;
+            // 
+            // btnBlacklist
+            // 
+            btnBlacklist.FlatStyle = FlatStyle.Flat;
+            btnBlacklist.Location = new Point(6, 265);
+            btnBlacklist.Name = "btnBlacklist";
+            btnBlacklist.Size = new Size(128, 30);
+            btnBlacklist.TabIndex = 12;
+            btnBlacklist.Text = "Черный список";
+            btnBlacklist.Click += btnBlacklist_Click;
             // 
             // panelActions
             // 
@@ -372,5 +396,8 @@
         private Button btnWrittenOff;
         private Button btnCurrency;
         private Button btnHistory;
+        private Button btnHeatMap;
+        private Button btnBlacklist;
+
     }
 }

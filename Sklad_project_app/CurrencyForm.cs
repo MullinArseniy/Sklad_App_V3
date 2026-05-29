@@ -1,10 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.Text.Json;
-using Sklad_project_app.Сurrency;
-using Sklad_project_app.Models;
-using System;
-
-namespace Sklad_project_app
+﻿namespace Sklad_project_app
 {
     public partial class CurrencyForm : Form
     {
@@ -296,6 +290,20 @@ namespace Sklad_project_app
         private void btnHistory_Click(object sender, EventArgs e)
         {
             var form = new ShipmentHistoryForm();
+            form.ShowDialog();
+        }
+        private void btnHeatMap_Click(object sender, EventArgs e)
+        {
+            var form = new HeatMapForm();
+            form.ShowDialog();
+        }
+
+        /// <summary>
+        /// Открывает форму управления чёрным списком контрагентов.
+        /// </summary>
+        private void btnBlacklist_Click(object sender, EventArgs e)
+        {
+            var form = new BlacklistForm();
             form.ShowDialog();
         }
     }

@@ -1,7 +1,4 @@
-﻿using Sklad_project_app.Models;
-
-
-namespace Sklad_project_app
+﻿namespace Sklad_project_app
 {
     public partial class CategoriesForm : Form
     {

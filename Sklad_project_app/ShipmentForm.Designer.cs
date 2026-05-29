@@ -14,7 +14,16 @@ namespace Sklad_project_app
 
         private void InitializeComponent()
         {
-            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
+            lblClient = new Label();
+            txtClientName = new TextBox();
+            lblClientInn = new Label();
+            txtClientInn = new TextBox();
+            btnCheckBlacklist = new Button();
+            cmbCity = new ComboBox();
+            btnCheckWeather = new Button();
+            lblDate = new Label();
+            dtpDate = new DateTimePicker();
             panelTop = new Panel();
             lblCompany = new Label();
             lblUserInfo = new Label();
@@ -22,13 +31,10 @@ namespace Sklad_project_app
             lblWarning = new Label();
             panelLeft = new Panel();
             lblShipTitle = new Label();
-            lblClient = new Label();
-            txtClientName = new TextBox();
-            lblDate = new Label();
-            dtpDate = new DateTimePicker();
             lblTotal = new Label();
             btnCancel = new Button();
             btnSubmit = new Button();
+            lblRegion = new Label();
             panelActions = new Panel();
             btnRefresh = new Button();
             panelFilters = new Panel();
@@ -47,6 +53,105 @@ namespace Sklad_project_app
             panelFilters.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvShipment).BeginInit();
             SuspendLayout();
+            // 
+            // lblClient
+            // 
+            lblClient.AutoSize = true;
+            lblClient.Font = new Font("Arial", 8F);
+            lblClient.ForeColor = Color.White;
+            lblClient.Location = new Point(5, 45);
+            lblClient.Name = "lblClient";
+            lblClient.Size = new Size(133, 16);
+            lblClient.TabIndex = 1;
+            lblClient.Text = "Клиент (название):";
+            // 
+            // txtClientName
+            // 
+            txtClientName.BackColor = Color.FromArgb(80, 80, 80);
+            txtClientName.BorderStyle = BorderStyle.FixedSingle;
+            txtClientName.ForeColor = Color.White;
+            txtClientName.Location = new Point(5, 62);
+            txtClientName.Name = "txtClientName";
+            txtClientName.Size = new Size(130, 27);
+            txtClientName.TabIndex = 2;
+            // 
+            // lblClientInn
+            // 
+            lblClientInn.AutoSize = true;
+            lblClientInn.Font = new Font("Arial", 8F);
+            lblClientInn.ForeColor = Color.White;
+            lblClientInn.Location = new Point(5, 92);
+            lblClientInn.Name = "lblClientInn";
+            lblClientInn.Size = new Size(96, 16);
+            lblClientInn.TabIndex = 3;
+            lblClientInn.Text = "ИНН клиента:";
+            // 
+            // txtClientInn
+            // 
+            txtClientInn.BackColor = Color.FromArgb(80, 80, 80);
+            txtClientInn.BorderStyle = BorderStyle.FixedSingle;
+            txtClientInn.ForeColor = Color.White;
+            txtClientInn.Location = new Point(4, 108);
+            txtClientInn.Name = "txtClientInn";
+            txtClientInn.Size = new Size(130, 27);
+            txtClientInn.TabIndex = 4;
+            // 
+            // btnCheckBlacklist
+            // 
+            btnCheckBlacklist.BackColor = Color.FromArgb(80, 80, 80);
+            btnCheckBlacklist.FlatStyle = FlatStyle.Flat;
+            btnCheckBlacklist.ForeColor = Color.White;
+            btnCheckBlacklist.Location = new Point(3, 141);
+            btnCheckBlacklist.Name = "btnCheckBlacklist";
+            btnCheckBlacklist.Size = new Size(130, 28);
+            btnCheckBlacklist.TabIndex = 5;
+            btnCheckBlacklist.Text = "Проверить клиента";
+            btnCheckBlacklist.UseVisualStyleBackColor = false;
+            btnCheckBlacklist.Click += btnCheckBlacklist_Click;
+            // 
+            // cmbCity
+            // 
+            cmbCity.BackColor = Color.FromArgb(80, 80, 80);
+            cmbCity.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbCity.ForeColor = Color.White;
+            cmbCity.Location = new Point(3, 201);
+            cmbCity.Name = "cmbCity";
+            cmbCity.Size = new Size(130, 28);
+            cmbCity.TabIndex = 7;
+            // 
+            // btnCheckWeather
+            // 
+            btnCheckWeather.BackColor = Color.FromArgb(80, 80, 80);
+            btnCheckWeather.FlatStyle = FlatStyle.Flat;
+            btnCheckWeather.ForeColor = Color.White;
+            btnCheckWeather.Location = new Point(3, 235);
+            btnCheckWeather.Name = "btnCheckWeather";
+            btnCheckWeather.Size = new Size(130, 50);
+            btnCheckWeather.TabIndex = 8;
+            btnCheckWeather.Text = "Погода в регионе";
+            btnCheckWeather.UseVisualStyleBackColor = false;
+            btnCheckWeather.Click += btnCheckWeather_Click;
+            // 
+            // lblDate
+            // 
+            lblDate.AutoSize = true;
+            lblDate.Font = new Font("Arial", 8F);
+            lblDate.ForeColor = Color.White;
+            lblDate.Location = new Point(4, 297);
+            lblDate.Name = "lblDate";
+            lblDate.Size = new Size(102, 16);
+            lblDate.TabIndex = 3;
+            lblDate.Text = "Дата отгрузки:";
+            lblDate.Click += lblDate_Click;
+            // 
+            // dtpDate
+            // 
+            dtpDate.Format = DateTimePickerFormat.Short;
+            dtpDate.Location = new Point(3, 316);
+            dtpDate.Name = "dtpDate";
+            dtpDate.Size = new Size(130, 27);
+            dtpDate.TabIndex = 4;
+            dtpDate.ValueChanged += dtpDate_ValueChanged;
             // 
             // panelTop
             // 
@@ -113,11 +218,17 @@ namespace Sklad_project_app
             panelLeft.Controls.Add(lblShipTitle);
             panelLeft.Controls.Add(lblClient);
             panelLeft.Controls.Add(txtClientName);
+            panelLeft.Controls.Add(lblClientInn);
+            panelLeft.Controls.Add(txtClientInn);
+            panelLeft.Controls.Add(btnCheckBlacklist);
+            panelLeft.Controls.Add(cmbCity);
+            panelLeft.Controls.Add(btnCheckWeather);
             panelLeft.Controls.Add(lblDate);
             panelLeft.Controls.Add(dtpDate);
             panelLeft.Controls.Add(lblTotal);
             panelLeft.Controls.Add(btnCancel);
             panelLeft.Controls.Add(btnSubmit);
+            panelLeft.Controls.Add(lblRegion);
             panelLeft.Location = new Point(0, 35);
             panelLeft.Name = "panelLeft";
             panelLeft.Size = new Size(140, 565);
@@ -127,71 +238,32 @@ namespace Sklad_project_app
             // 
             lblShipTitle.Font = new Font("Arial", 8F, FontStyle.Bold);
             lblShipTitle.ForeColor = Color.White;
-            lblShipTitle.Location = new Point(5, 8);
+            lblShipTitle.Location = new Point(4, 3);
             lblShipTitle.Name = "lblShipTitle";
             lblShipTitle.Size = new Size(130, 30);
             lblShipTitle.TabIndex = 0;
             lblShipTitle.Text = "ДАННЫЕ ОТГРУЗКИ";
             lblShipTitle.TextAlign = ContentAlignment.MiddleCenter;
             // 
-            // lblClient
-            // 
-            lblClient.AutoSize = true;
-            lblClient.Font = new Font("Arial", 8F);
-            lblClient.ForeColor = Color.White;
-            lblClient.Location = new Point(5, 45);
-            lblClient.Name = "lblClient";
-            lblClient.Size = new Size(133, 16);
-            lblClient.TabIndex = 1;
-            lblClient.Text = "Клиент (название):";
-            // 
-            // txtClientName
-            // 
-            txtClientName.BackColor = Color.FromArgb(80, 80, 80);
-            txtClientName.BorderStyle = BorderStyle.FixedSingle;
-            txtClientName.ForeColor = Color.White;
-            txtClientName.Location = new Point(5, 62);
-            txtClientName.Name = "txtClientName";
-            txtClientName.Size = new Size(130, 27);
-            txtClientName.TabIndex = 2;
-            // 
-            // lblDate
-            // 
-            lblDate.AutoSize = true;
-            lblDate.Font = new Font("Arial", 8F);
-            lblDate.ForeColor = Color.White;
-            lblDate.Location = new Point(5, 92);
-            lblDate.Name = "lblDate";
-            lblDate.Size = new Size(102, 16);
-            lblDate.TabIndex = 3;
-            lblDate.Text = "Дата отгрузки:";
-            // 
-            // dtpDate
-            // 
-            dtpDate.Format = DateTimePickerFormat.Short;
-            dtpDate.Location = new Point(5, 108);
-            dtpDate.Name = "dtpDate";
-            dtpDate.Size = new Size(130, 27);
-            dtpDate.TabIndex = 4;
-            // 
             // lblTotal
             // 
             lblTotal.BorderStyle = BorderStyle.FixedSingle;
             lblTotal.Font = new Font("Arial", 9F, FontStyle.Bold);
             lblTotal.ForeColor = Color.White;
-            lblTotal.Location = new Point(5, 145);
+            lblTotal.Location = new Point(4, 356);
             lblTotal.Name = "lblTotal";
-            lblTotal.Size = new Size(130, 45);
+            lblTotal.Size = new Size(130, 72);
             lblTotal.TabIndex = 5;
             lblTotal.Text = "ВЗЯТО ТОВАРОВ:\n0";
             lblTotal.TextAlign = ContentAlignment.MiddleCenter;
+            lblTotal.Click += lblTotal_Click;
             // 
             // btnCancel
             // 
             btnCancel.BackColor = Color.FromArgb(80, 80, 80);
             btnCancel.FlatStyle = FlatStyle.Flat;
             btnCancel.ForeColor = Color.White;
-            btnCancel.Location = new Point(5, 205);
+            btnCancel.Location = new Point(3, 440);
             btnCancel.Name = "btnCancel";
             btnCancel.Size = new Size(130, 30);
             btnCancel.TabIndex = 6;
@@ -204,13 +276,24 @@ namespace Sklad_project_app
             btnSubmit.BackColor = Color.FromArgb(30, 100, 200);
             btnSubmit.FlatStyle = FlatStyle.Flat;
             btnSubmit.ForeColor = Color.White;
-            btnSubmit.Location = new Point(5, 243);
+            btnSubmit.Location = new Point(3, 476);
             btnSubmit.Name = "btnSubmit";
             btnSubmit.Size = new Size(130, 30);
             btnSubmit.TabIndex = 7;
             btnSubmit.Text = "ОТПРАВИТЬ";
             btnSubmit.UseVisualStyleBackColor = false;
             btnSubmit.Click += btnSubmit_Click;
+            // 
+            // lblRegion
+            // 
+            lblRegion.AutoSize = true;
+            lblRegion.Font = new Font("Arial", 8F);
+            lblRegion.ForeColor = Color.White;
+            lblRegion.Location = new Point(3, 182);
+            lblRegion.Name = "lblRegion";
+            lblRegion.Size = new Size(119, 16);
+            lblRegion.TabIndex = 6;
+            lblRegion.Text = "Регион доставки:";
             // 
             // panelActions
             // 
@@ -338,14 +421,14 @@ namespace Sklad_project_app
             dgvShipment.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgvShipment.BackgroundColor = Color.White;
             dgvShipment.BorderStyle = BorderStyle.None;
-            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = Color.FromArgb(50, 50, 50);
-            dataGridViewCellStyle1.Font = new Font("Arial", 9F, FontStyle.Bold);
-            dataGridViewCellStyle1.ForeColor = Color.White;
-            dataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
-            dgvShipment.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = Color.FromArgb(50, 50, 50);
+            dataGridViewCellStyle2.Font = new Font("Arial", 9F, FontStyle.Bold);
+            dataGridViewCellStyle2.ForeColor = Color.White;
+            dataGridViewCellStyle2.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle2.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.True;
+            dgvShipment.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
             dgvShipment.ColumnHeadersHeight = 29;
             dgvShipment.EnableHeadersVisualStyles = false;
             dgvShipment.Location = new Point(140, 180);
@@ -411,5 +494,13 @@ namespace Sklad_project_app
         private System.Windows.Forms.Label lblFound;
         private System.Windows.Forms.Button btnReset;
         private System.Windows.Forms.DataGridView dgvShipment;
+        private System.Windows.Forms.TextBox txtInn;
+        private System.Windows.Forms.Label lblRegion;
+        private System.Windows.Forms.TextBox txtRegion;
+        private System.Windows.Forms.Label lblClientInn;
+        private System.Windows.Forms.TextBox txtClientInn;
+        private System.Windows.Forms.Button btnCheckBlacklist;
+        private System.Windows.Forms.ComboBox cmbCity;
+        private System.Windows.Forms.Button btnCheckWeather;
     }
 }

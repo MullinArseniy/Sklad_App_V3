@@ -1,6 +1,4 @@
-﻿using Sklad_project_app.Models;
-
-namespace Sklad_project_app
+﻿namespace Sklad_project_app
 {
     partial class AdminCatalogForm
     {
@@ -20,6 +18,7 @@ namespace Sklad_project_app
             lblCompany = new Label();
             lblUserInfo = new Label();
             btnLogout = new Button();
+            btnHeatMap = new Button();
             panelLeft = new Panel();
             btnCurrency = new Button();
             btnWrittenOff = new Button();
@@ -29,6 +28,7 @@ namespace Sklad_project_app
             btnCatalog = new Button();
             btnCategories = new Button();
             btnHistory = new Button();
+            btnBlacklist = new Button();
             panelActions = new Panel();
             btnAdd = new Button();
             btnEdit = new Button();
@@ -119,6 +119,16 @@ namespace Sklad_project_app
             btnLogout.UseVisualStyleBackColor = false;
             btnLogout.Click += btnLogout_Click;
             // 
+            // btnHeatMap
+            // 
+            btnHeatMap.FlatStyle = FlatStyle.Flat;
+            btnHeatMap.Location = new Point(5, 340);
+            btnHeatMap.Name = "btnHeatMap";
+            btnHeatMap.Size = new Size(128, 30);
+            btnHeatMap.TabIndex = 11;
+            btnHeatMap.Text = "Тепловая карта";
+            btnHeatMap.Click += btnHeatMap_Click;
+            // 
             // panelLeft
             // 
             panelLeft.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
@@ -132,6 +142,8 @@ namespace Sklad_project_app
             panelLeft.Controls.Add(btnCatalog);
             panelLeft.Controls.Add(btnCategories);
             panelLeft.Controls.Add(btnHistory);
+            panelLeft.Controls.Add(btnHeatMap);
+            panelLeft.Controls.Add(btnBlacklist);
             panelLeft.Location = new Point(0, 35);
             panelLeft.Name = "panelLeft";
             panelLeft.Size = new Size(140, 565);
@@ -223,6 +235,16 @@ namespace Sklad_project_app
             btnHistory.TabIndex = 2;
             btnHistory.Text = "История отгрузок";
             btnHistory.Click += btnHistory_Click;
+            // 
+            // btnBlacklist
+            // 
+            btnBlacklist.FlatStyle = FlatStyle.Flat;
+            btnBlacklist.Location = new Point(5, 302);
+            btnBlacklist.Name = "btnBlacklist";
+            btnBlacklist.Size = new Size(128, 30);
+            btnBlacklist.TabIndex = 12;
+            btnBlacklist.Text = "Черный список";
+            btnBlacklist.Click += btnBlacklist_Click;
             // 
             // panelActions
             // 
@@ -717,5 +739,7 @@ namespace Sklad_project_app
         private Button btnExpirationDates;
         private Button btnWrittenOff;
         private Button btnCurrency;
+        private Button btnHeatMap;
+        private Button btnBlacklist;
     }
 }

@@ -1,9 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using Sklad_project_app;
+﻿using Newtonsoft.Json;
 using Sklad_project_app.Import;
-using Sklad_project_app.Models;
-using Sklad_project_app.Сurrency;
 
 
 namespace Sklad_project_app
@@ -109,49 +105,53 @@ namespace Sklad_project_app
                 cmbDate.SelectedIndex = 0;
             }
         }
-        private void UpdateDiscountsFromExpiry()
+
+        /// <summary>
+        /// Асинхронно обновляет скидки на партии товаров на основе оставшегося срока годности.
+        /// Если осталось меньше 20% от общего срока — устанавливает скидку 50%.
+        /// Если срок вышел — устанавливает скидку 100%.
+        /// Сохраняет изменения только если были реальные обновления.
+        /// </summary>
+        private async Task UpdateDiscountsFromExpiry()
         {
-            using (var db = new SkladContext())
+            using var db = new SkladContext();
+            var today = DateTime.Now.Date;
+
+            var batches = await db.StockBatches
+                .Include(b => b.Product)
+                .Where(b => !b.IsWrittenOff && b.Quantity > 0 && b.ExpiryDate != null)
+                .ToListAsync();
+
+            var changed = false;
+
+            foreach (var batch in batches)
             {
-                var today = DateTime.Now.Date;
+                var daysLeft = (batch.ExpiryDate!.Value.Date - today).Days;
+                var totalDays = batch.TotalDays;
+                decimal newDiscount = 0;
 
-                var batches = db.StockBatches
-                    .Include(b => b.Product)
-                    .Where(b => !b.IsWrittenOff && b.Quantity > 0 && b.ExpiryDate != null)
-                    .ToList();
-
-                bool changed = false;
-
-                foreach (var batch in batches)
+                if (daysLeft <= 0)
                 {
-                    int daysLeft = (batch.ExpiryDate.Value.Date - today).Days;
-                    int totalDays = batch.TotalDays;
-
-                    decimal newDiscount = 0;
-
-                    if (daysLeft <= 0)
+                    newDiscount = 100;
+                }
+                else if (totalDays > 0)
+                {
+                    var percentLeft = (double)daysLeft / totalDays * 100;
+                    if (percentLeft <= 20)
                     {
-                        newDiscount = 100;
-                    }
-                    else if (totalDays > 0)
-                    {
-                        double percentLeft = (double)daysLeft / totalDays * 100;
-                        if (percentLeft <= 20)
-                        {
-                            newDiscount = 50;
-                        }
-                    }
-
-                    if (batch.DiscountPercent != newDiscount)
-                    {
-                        batch.DiscountPercent = newDiscount;
-                        changed = true;
+                        newDiscount = 50;
                     }
                 }
 
-                if (changed)
-                    db.SaveChanges();
+                if (batch.DiscountPercent != newDiscount)
+                {
+                    batch.DiscountPercent = newDiscount;
+                    changed = true;
+                }
             }
+
+            if (changed)
+                await db.SaveChangesAsync();
         }
 
         public void LoadSupplies()
@@ -505,142 +505,94 @@ namespace Sklad_project_app
             cmbProduct.SelectedIndex = -1;
         }
 
-        private void btnImport_Click(object sender, EventArgs e)
+        private async void btnImport_Click(object sender, EventArgs e)
         {
-            OpenFileDialog ofd = new OpenFileDialog();
+            var ofd = new OpenFileDialog();
             ofd.InitialDirectory = @"..\..\..\Files";
             ofd.Title = "Выберите JSON файл с поставками";
             ofd.Filter = "JSON файлы (*.json)|*.json";
 
-            if (ofd.ShowDialog() == DialogResult.OK)
+            if (ofd.ShowDialog() != DialogResult.OK)
+                return;
+
+            btnImport.Enabled = false;
+            btnImport.Text = "Импорт...";
+
+            try
             {
-                int importedCount = 0;
-                int skippedCount = 0;
-                var skippedReasons = new List<string>();
-                try
+                var json = await File.ReadAllTextAsync(ofd.FileName);
+                var supplies = JsonConvert.DeserializeObject<List<ImportSupplies>>(json);
+
+                if (supplies == null || supplies.Count == 0)
                 {
-                    string json = File.ReadAllText(ofd.FileName);
-                    var supplies = JsonConvert.DeserializeObject<List<ImportSupplies>>(json);
-
-                    if (supplies == null || supplies.Count == 0)
-                    {
-                        MessageBox.Show("Файл пуст");
-                        return;
-                    }
-
-                    DialogResult result = MessageBox.Show(
-                        $"Найдено {supplies.Count} позиций. Импортировать?",
-                        "Подтверждение",
-                        MessageBoxButtons.YesNo,
-                        MessageBoxIcon.Question);
-
-                    if (result == DialogResult.Yes)
-                    {
-                        using (var db = new SkladContext())
-                        {
-                            foreach (var item in supplies)
-                            {
-                                //Поиск
-                                var product = db.Products.FirstOrDefault(p =>
-                                    p.Article == item.Article || p.Name == item.ProductName);
-
-                                if (product == null)
-                                {
-                                    skippedCount++;
-                                    skippedReasons.Add($"Товар '{item.ProductName}' (арт. {item.Article}) не найден");
-                                    continue;
-                                }
-                                var supply = new Supplies
-                                {
-                                    Id = Guid.NewGuid(),
-                                    SuppliesDate = item.Date.ToUniversalTime(),
-                                    UserId = CurrentUser.User.Id,
-                                };
-                                db.Supplies.Add(supply);
-
-                                // Создание позиции поставки
-                                var supplyItem = new SuppliesItem
-                                {
-                                    Id = Guid.NewGuid(),
-                                    SuppliesId = supply.Id,
-                                    ProductId = product.Id,
-                                    Quantity = item.Quantity,
-                                    PurchasePrice = item.Price
-                                };
-                                db.SuppliesItems.Add(supplyItem);
-
-                                int totalDays = item.ExpiryDays > 0 ? item.ExpiryDays : 365; 
-                                DateTime expiryDate = item.Date.Date.AddDays(totalDays).ToUniversalTime();
-
-                                var stockBatch = new StockBatch
-                                {
-                                    Id = Guid.NewGuid(),
-                                    ProductId = product.Id,
-                                    SuppliesId = supply.Id,
-                                    Quantity = item.Quantity,
-                                    PurchasePrice = item.Price,
-                                    ExpiryDate = expiryDate,
-                                    TotalDays = totalDays,
-                                    DiscountPercent = 0,
-                                    IsWrittenOff = false
-                                };
-                                db.StockBatches.Add(stockBatch);
-
-                                // Обновление остатка
-                                var stock = db.Stocks.FirstOrDefault(s => s.ProductId == product.Id);
-                                if (stock != null)
-                                    stock.Rest += item.Quantity;
-                                else
-                                {
-                                    stock = new Stock
-                                    {
-                                        Id = Guid.NewGuid(),
-                                        ProductId = product.Id,
-                                        Rest = item.Quantity,
-                                        PurchasePrice = item.Price
-                                    };
-                                    db.Stocks.Add(stock);
-                                }
-
-                                importedCount++;
-                            }
-                            db.SaveChanges();
-                        }
-                        Logger.Debug($"DEBUG-08: JSON-файл поставки успешно импортирован.\n" +
-                             $"Пользователь: {CurrentUser.User?.Login}\n" +
-                             $"Файл: {ofd.FileName}\n" +
-                             $"Всего строк: {supplies.Count} | Импортировано: {importedCount} | Пропущено: {skippedCount}\n" +
-                             $"Время: {DateTime.Now}");
-                        // WARN-04: Пропущенные строки при импорте
-                        if (skippedCount > 0)
-                        {
-                            Logger.Warn($"WARN-04: Пропущенные строки при импорте JSON.\n" +
-                                        $"Пользователь: {CurrentUser.User?.Login}\n" +
-                                        $"Файл: {ofd.FileName}\n" +
-                                        $"Всего строк: {supplies.Count} | Импортировано: {importedCount} | Пропущено: {skippedCount}\n" +
-                                        $"Причины: {string.Join("; ", skippedReasons.Take(5))}");
-                        }
-                        else
-                        {
-                            MessageBox.Show($"Импортировано {importedCount} поставок!");
-                        }
-                        LoadSupplies();
-                    }
+                    MessageBox.Show("Файл пуст или имеет неверный формат.",
+                        "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
                 }
-                catch (Exception ex)
+
+                // Проверяем ИНН поставщика перед импортом
+                var checkResult = await CheckSupplierInnAsync(supplies);
+                if (!checkResult.IsAllowed)
                 {
-                    Logger.Error($"ERROR-07: Общая ошибка при импорте JSON-файла поставки.\n" +
-                                 $"Пользователь: {CurrentUser.User?.Login}\n" +
-                                 $"Файл: {ofd.FileName}\n" +
-                                 $"Исключение: {ex.GetType()} --- {ex.Message}\n" +
-                                 $"Стек: {ex.StackTrace}", ex);
-                    MessageBox.Show($"Ошибка при импорте: {ex.Message}", "Ошибка",
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(checkResult.ErrorMessage,
+                        "Поставка отклонена", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
                 }
+
+                var result = MessageBox.Show(
+                    "Найдено " + supplies.Count + " позиций. Импортировать?",
+                    "Подтверждение",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question);
+
+                if (result != DialogResult.Yes)
+                    return;
+
+                var importResult = await ImportSuppliesAsync(supplies, ofd.FileName);
+
+                if (importResult.SkippedCount > 0)
+                {
+                    MessageBox.Show(
+                        "Импорт завершён.\n" +
+                        "Импортировано: " + importResult.ImportedCount + " позиций.\n" +
+                        "Пропущено: " + importResult.SkippedCount + " позиций.\n\n" +
+                        "Причины пропуска:\n" + string.Join("\n", importResult.SkippedReasons),
+                        "Результат импорта",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                }
+                else
+                {
+                    MessageBox.Show(
+                        "Импорт завершён успешно.\n" +
+                        "Импортировано: " + importResult.ImportedCount + " позиций.",
+                        "Готово",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
+                }
+
+                LoadSupplies();
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(
+                    "ERROR-07: Общая ошибка при импорте JSON-файла поставки.\n" +
+                    "Пользователь: " + CurrentUser.User?.Login + "\n" +
+                    "Файл: " + ofd.FileName + "\n" +
+                    "Исключение: " + ex.GetType() + " --- " + ex.Message + "\n" +
+                    "Стек: " + ex.StackTrace, ex);
+
+                MessageBox.Show("Ошибка при импорте: " + ex.Message,
+                    "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                btnImport.Enabled = true;
+                btnImport.Text = "Импорт";
             }
         }
 
-        private void btnSave_Click(object sender, EventArgs e)
+        private async void btnSave_Click(object sender, EventArgs e)
         {
             decimal price;
             int quantity;
@@ -724,7 +676,7 @@ namespace Sklad_project_app
                         UserId = CurrentUser.User.Id,
                     };
                     db.Supplies.Add(supply);
-                    db.SaveChanges();
+                    await db.SaveChangesAsync();
 
                     var supplyItem = new SuppliesItem
                     {
@@ -849,6 +801,361 @@ namespace Sklad_project_app
             form.ShowDialog();
             this.Close();
         }
+
+
+
+        /// <summary>
+        /// Проверяет ИНН поставщика по таблице чёрного списка в базе данных.
+        /// Если контрагент найден — выводит предупреждение с причиной блокировки.
+        /// Если не найден — подтверждает что поставщик чист.
+        /// </summary>
+        private void btnCheckSupplierBlacklist_Click(object sender, EventArgs e)
+        {
+            var inn = txtSupplierInn.Text.Trim();
+
+            if (string.IsNullOrEmpty(inn))
+            {
+                MessageBox.Show("Введите ИНН поставщика для проверки.",
+                    "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (inn.Length != 10 && inn.Length != 12)
+            {
+                MessageBox.Show("ИНН должен содержать 10 цифр (юрлицо) или 12 цифр (ИП).",
+                    "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            foreach (var ch in inn)
+            {
+                if (!char.IsDigit(ch))
+                {
+                    MessageBox.Show("ИНН должен содержать только цифры.",
+                        "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+            }
+
+            try
+            {
+                using var db = new SkladContext();
+                var found = db.Blacklist.FirstOrDefault(b => b.Inn == inn);
+
+                if (found != null)
+                {
+                    MessageBox.Show(
+                        "ВНИМАНИЕ! Поставщик находится в чёрном списке!\n\n" +
+                        "ИНН: " + found.Inn + "\n" +
+                        "Наименование: " + (found.Name ?? "не указано") + "\n" +
+                        "Причина блокировки: " + found.Reason + "\n" +
+                        "Дата добавления: " + found.AddedDate.ToString("dd.MM.yyyy") + "\n\n" +
+                        "Приём поставки от данного поставщика не рекомендуется.",
+                        "Поставщик в чёрном списке",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
+                }
+                else
+                {
+                    MessageBox.Show(
+                        "ИНН " + inn + " не найден в чёрном списке.\n" +
+                        "Поставщик не имеет ограничений по базе данных.",
+                        "Проверка пройдена",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка при проверке контрагента: " + ex.Message,
+                    "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+
+        /// <summary>
+        /// Проверяет ИНН поставщика из списка позиций импорта по таблице чёрного списка.
+        /// Берёт ИНН из первой позиции, у которой поле SupplierInn не пустое.
+        /// Если ИНН отсутствует во всех позициях — предупреждает, но разрешает импорт.
+        /// Если ИНН найден в чёрном списке — запрещает импорт и возвращает причину.
+        /// </summary>
+        public async Task<InnCheckResult> CheckSupplierInnAsync(List<ImportSupplies> supplies)
+        {
+            var inn = "";
+            foreach (var item in supplies)
+            {
+                if (!string.IsNullOrWhiteSpace(item.SupplierInn))
+                {
+                    inn = item.SupplierInn.Trim();
+                    break;
+                }
+            }
+
+            if (string.IsNullOrEmpty(inn))
+            {
+                var warnResult = MessageBox.Show(
+                    "В файле не указан ИНН поставщика (поле SupplierInn).\n" +
+                    "Проверка по чёрному списку невозможна.\n\n" +
+                    "Продолжить импорт без проверки?",
+                    "ИНН не указан",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Warning);
+
+                return new InnCheckResult
+                {
+                    IsAllowed = warnResult == DialogResult.Yes,
+                    ErrorMessage = "Импорт отменён пользователем из-за отсутствия ИНН поставщика."
+                };
+            }
+
+            if (inn.Length != 10 && inn.Length != 12)
+            {
+                return new InnCheckResult
+                {
+                    IsAllowed = false,
+                    ErrorMessage =
+                        "Неверный формат ИНН поставщика: " + inn + "\n" +
+                        "ИНН должен содержать 10 цифр (юрлицо) или 12 цифр (ИП).\n" +
+                        "Исправьте файл и повторите импорт."
+                };
+            }
+
+            foreach (var ch in inn)
+            {
+                if (!char.IsDigit(ch))
+                {
+                    return new InnCheckResult
+                    {
+                        IsAllowed = false,
+                        ErrorMessage =
+                            "ИНН поставщика содержит недопустимые символы: " + inn + "\n" +
+                            "ИНН должен состоять только из цифр.\n" +
+                            "Исправьте файл и повторите импорт."
+                    };
+                }
+            }
+
+            // Запрашиваем базу данных асинхронно
+            try
+            {
+                using var db = new SkladContext();
+                var blacklistEntry = await db.Blacklist
+                    .FirstOrDefaultAsync(b => b.Inn == inn);
+
+                if (blacklistEntry != null)
+                {
+                    Logger.Warn(
+                        "WARN-11: Попытка импорта поставки от заблокированного поставщика.\n" +
+                        "Пользователь: " + CurrentUser.User?.Login + "\n" +
+                        "ИНН поставщика: " + inn + "\n" +
+                        "Причина блокировки: " + blacklistEntry.Reason + "\n" +
+                        "Импорт отклонён.");
+
+                    return new InnCheckResult
+                    {
+                        IsAllowed = false,
+                        ErrorMessage =
+                            "ПОСТАВКА ОТКЛОНЕНА!\n\n" +
+                            "Поставщик находится в чёрном списке.\n\n" +
+                            "ИНН: " + blacklistEntry.Inn + "\n" +
+                            "Наименование: " + (blacklistEntry.Name ?? "не указано") + "\n" +
+                            "Причина блокировки: " + blacklistEntry.Reason + "\n" +
+                            "Дата добавления в список: " + blacklistEntry.AddedDate.ToString("dd.MM.yyyy") + "\n\n" +
+                            "Обратитесь к администратору для выяснения обстоятельств."
+                    };
+                }
+
+                Logger.Debug(
+                    "DEBUG-11: ИНН поставщика прошёл проверку по чёрному списку.\n" +
+                    "Пользователь: " + CurrentUser.User?.Login + "\n" +
+                    "ИНН: " + inn + "\n" +
+                    "Время: " + DateTime.Now);
+
+                return new InnCheckResult
+                {
+                    IsAllowed = true,
+                    ErrorMessage = ""
+                };
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(
+                    "ERROR-12: Ошибка при проверке ИНН поставщика по чёрному списку.\n" +
+                    "ИНН: " + inn + "\n" +
+                    "Исключение: " + ex.GetType() + " --- " + ex.Message, ex);
+
+                // При ошибке подключения к БД спрашиваем пользователя
+                var continueResult = MessageBox.Show(
+                    "Не удалось выполнить проверку ИНН по чёрному списку.\n" +
+                    "Ошибка: " + ex.Message + "\n\n" +
+                    "Продолжить импорт без проверки?",
+                    "Ошибка проверки",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Warning);
+
+                return new InnCheckResult
+                {
+                    IsAllowed = continueResult == DialogResult.Yes,
+                    ErrorMessage = "Импорт отменён из-за ошибки проверки ИНН."
+                };
+            }
+        }
+
+        /// <summary>
+        /// Выполняет асинхронный импорт позиций поставки в базу данных.
+        /// Для каждой позиции создаёт запись поставки, позицию поставки,
+        /// партию товара (StockBatch) и обновляет общий остаток (Stock).
+        /// Если товар по артикулу не найден — позиция пропускается.
+        /// </summary>
+
+        public async Task<ImportResult> ImportSuppliesAsync(List<ImportSupplies> supplies, string fileName)
+        {
+            var importedCount = 0;
+            var skippedCount = 0;
+            var skippedReasons = new List<string>();
+
+            using var db = new SkladContext();
+
+            foreach (var item in supplies)
+            {
+                // Ищем товар по артикулу или названию
+                var product = await db.Products.FirstOrDefaultAsync(p =>
+                    p.Article == item.Article || p.Name == item.ProductName);
+
+                if (product == null)
+                {
+                    skippedCount++;
+                    skippedReasons.Add(
+                        "Товар '" + item.ProductName + "' (арт. " + item.Article + ") не найден в каталоге.");
+                    continue;
+                }
+
+                var supply = new Supplies
+                {
+                    Id = Guid.NewGuid(),
+                    SuppliesDate = item.Date.ToUniversalTime(),
+                    UserId = CurrentUser.User.Id
+                };
+                db.Supplies.Add(supply);
+
+                var supplyItem = new SuppliesItem
+                {
+                    Id = Guid.NewGuid(),
+                    SuppliesId = supply.Id,
+                    ProductId = product.Id,
+                    Quantity = item.Quantity,
+                    PurchasePrice = item.Price
+                };
+                db.SuppliesItems.Add(supplyItem);
+
+                var totalDays = item.ExpiryDays > 0 ? item.ExpiryDays : 365;
+                var expiryDate = item.Date.Date.AddDays(totalDays).ToUniversalTime();
+
+                var stockBatch = new StockBatch
+                {
+                    Id = Guid.NewGuid(),
+                    ProductId = product.Id,
+                    SuppliesId = supply.Id,
+                    Quantity = item.Quantity,
+                    PurchasePrice = item.Price,
+                    ExpiryDate = expiryDate,
+                    TotalDays = totalDays,
+                    DiscountPercent = 0,
+                    IsWrittenOff = false
+                };
+                db.StockBatches.Add(stockBatch);
+
+                var stock = await db.Stocks.FirstOrDefaultAsync(s => s.ProductId == product.Id);
+                if (stock != null)
+                {
+                    stock.Rest += item.Quantity;
+                }
+                else
+                {
+                    stock = new Stock
+                    {
+                        Id = Guid.NewGuid(),
+                        ProductId = product.Id,
+                        Rest = item.Quantity,
+                        PurchasePrice = item.Price
+                    };
+                    db.Stocks.Add(stock);
+                }
+
+                importedCount++;
+            }
+
+            await db.SaveChangesAsync();
+
+            Logger.Debug(
+                "DEBUG-08: JSON-файл поставки успешно импортирован.\n" +
+                "Пользователь: " + CurrentUser.User?.Login + "\n" +
+                "Файл: " + fileName + "\n" +
+                "Всего строк: " + supplies.Count +
+                " | Импортировано: " + importedCount +
+                " | Пропущено: " + skippedCount + "\n" +
+                "Время: " + DateTime.Now);
+
+            if (skippedCount > 0)
+            {
+                Logger.Warn(
+                    "WARN-04: Пропущенные строки при импорте JSON.\n" +
+                    "Пользователь: " + CurrentUser.User?.Login + "\n" +
+                    "Файл: " + fileName + "\n" +
+                    "Всего: " + supplies.Count +
+                    " | Импортировано: " + importedCount +
+                    " | Пропущено: " + skippedCount + "\n" +
+                    "Причины: " + string.Join("; ", skippedReasons.Take(5)));
+            }
+
+            return new ImportResult
+            {
+                ImportedCount = importedCount,
+                SkippedCount = skippedCount,
+                SkippedReasons = skippedReasons
+            };
+        }
+
+        private void btnCheckApiSupply_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void lblExpirationDate_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void lblRestView_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void txtPriceView_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void lblArticleEdit_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnHeatMap_Click(object sender, EventArgs e)
+        {
+            var form = new HeatMapForm();
+            form.ShowDialog();
+        }
+
+        /// <summary>
+        /// Открывает форму управления чёрным списком контрагентов.
+        /// </summary>
+        private void btnBlacklist_Click(object sender, EventArgs e)
+        {
+            var form = new BlacklistForm();
+            form.ShowDialog();
+        }
+
     }
 
 }

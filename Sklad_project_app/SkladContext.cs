@@ -1,8 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Sklad_project_app.Models;
-
-
-namespace Sklad_project_app
+﻿namespace Sklad_project_app
 {
     public class SkladContext : DbContext
     {
@@ -19,6 +15,8 @@ namespace Sklad_project_app
         public DbSet<SuppliesItem> SuppliesItems { get; set; }
         public DbSet<StockBatch> StockBatches { get; set; }
         public DbSet<WriteOff> WriteOffs { get; set; }
+        public DbSet<Blacklist> Blacklist { get; set; }
+        public DbSet<CityWeather> CitiesWeather { get; set; }
 
         public SkladContext() { }
 
@@ -201,6 +199,26 @@ namespace Sklad_project_app
                 .HasOne(w => w.StockBatch)
                 .WithMany()
                 .HasForeignKey(w => w.BatchId);
+
+            // Blacklist
+            modelBuilder.Entity<Blacklist>().ToTable("blacklist");
+            modelBuilder.Entity<Blacklist>().HasKey(b => b.Id);
+            modelBuilder.Entity<Blacklist>().Property(b => b.Id).HasColumnName("id");
+            modelBuilder.Entity<Blacklist>().Property(b => b.Inn).HasColumnName("inn");
+            modelBuilder.Entity<Blacklist>().Property(b => b.Name).HasColumnName("name");
+            modelBuilder.Entity<Blacklist>().Property(b => b.Reason).HasColumnName("reason");
+            modelBuilder.Entity<Blacklist>().Property(b => b.AddedDate).HasColumnName("added_date");
+
+            // CitiesWeather
+            modelBuilder.Entity<CityWeather>().ToTable("cities_weather");
+            modelBuilder.Entity<CityWeather>().HasKey(c => c.Id);
+            modelBuilder.Entity<CityWeather>().Property(c => c.Id).HasColumnName("id");
+            modelBuilder.Entity<CityWeather>().Property(c => c.CityName).HasColumnName("city_name");
+            modelBuilder.Entity<CityWeather>().Property(c => c.Region).HasColumnName("region");
+            modelBuilder.Entity<CityWeather>().Property(c => c.TemperatureMin).HasColumnName("temperature_min");
+            modelBuilder.Entity<CityWeather>().Property(c => c.TemperatureMax).HasColumnName("temperature_max");
+            modelBuilder.Entity<CityWeather>().Property(c => c.WeatherDescription).HasColumnName("weather_description");
+            modelBuilder.Entity<CityWeather>().Property(c => c.UpdatedAt).HasColumnName("updated_at");
 
             base.OnModelCreating(modelBuilder);
         }

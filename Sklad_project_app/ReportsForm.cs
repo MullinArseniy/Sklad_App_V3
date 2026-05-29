@@ -1,14 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Sklad_project_app.Models;
-using Sklad_project_app.Сurrency;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Net;
+﻿using System.Data;
 using System.Text;
-using System.Windows.Forms;
+
 
 namespace Sklad_project_app
 {
@@ -399,6 +391,21 @@ namespace Sklad_project_app
             currencyform.ShowDialog();
             this.Close();
         }
+        private void btnHeatMap_Click(object sender, EventArgs e)
+        {
+            var form = new HeatMapForm();
+            form.ShowDialog();
+        }
+
+        /// <summary>
+        /// Открывает форму управления чёрным списком контрагентов.
+        /// </summary>
+        private void btnBlacklist_Click(object sender, EventArgs e)
+        {
+            var form = new BlacklistForm();
+            form.ShowDialog();
+        }
+
     }
 }
 

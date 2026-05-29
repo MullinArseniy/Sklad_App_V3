@@ -1,5 +1,5 @@
 ﻿using Sklad_project_app.Models;
-
+using NUnit.Framework.Legacy;
 
 namespace Sklad_project_app.Tests
 {
@@ -114,6 +114,125 @@ namespace Sklad_project_app.Tests
                 // Assert
                 Assert.AreEqual(2, userShipments.Count);
             }
+        }
+
+        [Test]
+        public void GetWeatherWarning_MinTempBelowMinus15_ReturnsSevereFreezeWarning()
+        {
+            // Arrange
+            var shipmentForm = new ShipmentForm();
+            decimal minTemperature = -20m;
+            decimal maxTemperature = 5m;
+
+            // Act
+            var result = shipmentForm.GetWeatherWarning(minTemperature, maxTemperature);
+
+            // Assert
+            StringAssert.Contains("ВНИМАНИЕ! Аномальный мороз!", result);
+        }
+
+        [Test]
+        public void GetWeatherWarning_MaxTempAbove35_ReturnsSevereHeatWarning()
+        {
+            // Arrange
+            var shipmentForm = new ShipmentForm();
+            decimal minTemperature = 10m;
+            decimal maxTemperature = 40m;
+
+            // Act
+            var result = shipmentForm.GetWeatherWarning(minTemperature, maxTemperature);
+
+            // Assert
+            StringAssert.Contains("ВНИМАНИЕ! Аномальная жара!", result);
+        }
+
+        [Test]
+        public void GetWeatherWarning_ComfortableConditions_ReturnsGoodWeatherMessage()
+        {
+            // Arrange
+            var shipmentForm = new ShipmentForm();
+            decimal minTemperature = 15m;
+            decimal maxTemperature = 25m;
+
+            // Act
+            var result = shipmentForm.GetWeatherWarning(minTemperature, maxTemperature);
+
+            // Assert
+            StringAssert.Contains("Погодные условия благоприятны для доставки.", result);
+        }
+
+        [Test]
+        public void GetWeatherWarning_ExtremelyLowTemperature_ReturnsSevereFreezeWarning()
+        {
+            // Arrange
+            var shipmentForm = new ShipmentForm();
+            decimal minTemperature = -50m;
+            decimal maxTemperature = -10m;
+
+            // Act
+            var result = shipmentForm.GetWeatherWarning(minTemperature, maxTemperature);
+
+            // Assert
+            StringAssert.Contains("ВНИМАНИЕ! Аномальный мороз!", result);
+        }
+
+        [Test]
+        public void GetWeatherWarning_ExtremelyHighTemperature_ReturnsSevereHeatWarning()
+        {
+            // Arrange
+            var shipmentForm = new ShipmentForm();
+            decimal minTemperature = 30m;
+            decimal maxTemperature = 50m;
+
+            // Act
+            var result = shipmentForm.GetWeatherWarning(minTemperature, maxTemperature);
+
+            // Assert
+            StringAssert.Contains("ВНИМАНИЕ! Аномальная жара!", result);
+        }
+
+        [Test]
+        public void GetWeatherWarning_EqualZeroTemperatures_ReturnsNormalCondition()
+        {
+            // Arrange
+            var shipmentForm = new ShipmentForm();
+            decimal temperature = 0m;
+
+            // Act
+            var result = shipmentForm.GetWeatherWarning(temperature, temperature);
+
+            // Assert
+            StringAssert.Contains("Погодные условия благоприятны для доставки.", result);
+        }
+
+        [Test]
+        public void GetWeatherWarning_NegativeMaxTemperature_ReturnsColdWarning()
+        {
+            // Arrange
+            var shipmentForm = new ShipmentForm();
+            decimal minTemperature = -20m;
+            decimal maxTemperature = -10m;
+
+            // Act
+            var result = shipmentForm.GetWeatherWarning(minTemperature, maxTemperature);
+
+            // Assert
+            StringAssert.Contains("ВНИМАНИЕ! Аномальный мороз!", result);
+        }
+
+        [Test]
+        public void GetWeatherWarning_MixedZeroTemperatures_ReturnsNormalCondition()
+        {
+            // Arrange
+            var shipmentForm = new ShipmentForm();
+            decimal minTemperature = -5m;
+            decimal maxTemperature = 5m;
+
+            // Act
+            var result = shipmentForm.GetWeatherWarning(minTemperature, maxTemperature);
+
+            // Assert
+            StringAssert.Contains("Погодные условия благоприятны для доставки.", result);
         }
     }
 }

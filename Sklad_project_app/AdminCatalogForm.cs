@@ -1,8 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-using Sklad_project_app.Models;
-using Sklad_project_app.Сurrency;
-
-
 namespace Sklad_project_app
 {
     public partial class AdminCatalogForm : Form
@@ -72,17 +67,17 @@ namespace Sklad_project_app
             cmbAvailability.SelectedIndex = 0;
         }
 
-        public void LoadProducts()
+        public async void LoadProducts()
         {
             try
             {
                 using (var db = new SkladContext())
                 {
-                    var allProducts = db.Products
+                    var allProducts = await db.Products
                         .Include("Category")
                         .Include("Unit")
                         .Include("Stock")
-                        .ToList();
+                        .ToListAsync();
 
                     int totalCount = allProducts.Count;
 
@@ -221,8 +216,8 @@ namespace Sklad_project_app
 
                         if (product.Stock != null)
                         {
-                            bool discountExists = db.StockBatches
-                                .Any(b => b.ProductId == product.Id
+                            bool discountExists = await db.StockBatches
+                                .AnyAsync(b => b.ProductId == product.Id
                                        && !b.IsWrittenOff
                                        && b.Quantity > 0
                                        && b.DiscountPercent > 0);
@@ -576,7 +571,7 @@ namespace Sklad_project_app
             btnSaveEdit.Visible = true;
         }
 
-        private void btnSaveEdit_Click(object sender, EventArgs e)
+        private async void btnSaveEdit_Click(object sender, EventArgs e)
         {
             var article = txtArticleEdit.Text.Trim();
             var name = txtNameEdit.Text.Trim();
@@ -668,7 +663,7 @@ namespace Sklad_project_app
 
                         try
                         {
-                            db.SaveChanges();
+                            await db.SaveChangesAsync();
                         }
                         catch (Exception ex)
                         {
@@ -687,7 +682,7 @@ namespace Sklad_project_app
 
                         try
                         {
-                            db.SaveChanges();
+                            await db.SaveChangesAsync();
                             Logger.Debug($"DEBUG-03: Новый товар добавлен в каталог.\n" +
                              $"Пользователь: {CurrentUser.User?.Login}\n" +
                              $"ProductId: {newProduct.Id} | Артикул: {article} | Название: {name}\n" +
@@ -741,7 +736,7 @@ namespace Sklad_project_app
 
                         try
                         {
-                            db.SaveChanges();
+                            await db.SaveChangesAsync();
                             Logger.Debug($"DEBUG-04: Данные товара обновлены.\n" +
                              $"Пользователь: {CurrentUser.User?.Login}\n" +
                              $"ProductId: {_selectedProductId}\n" +
@@ -854,5 +849,22 @@ namespace Sklad_project_app
             var currencyform = new CurrencyForm();
             currencyform.ShowDialog();
         }
+        private void btnHeatMap_Click(object sender, EventArgs e)
+        {
+            var form = new HeatMapForm();
+            form.ShowDialog();
+        }
+
+        /// <summary>
+        /// Открывает форму управления чёрным списком контрагентов.
+        /// </summary>
+        private void btnBlacklist_Click(object sender, EventArgs e)
+        {
+            var form = new BlacklistForm();
+            form.ShowDialog();
+        }
+
+
+
     }
 }
